@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rastreador de Despesas Pessoais</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f4f8;
+    }
+
+    .tab-active {
+      border-bottom: 3px solid #3b82f6;
+      color: #1e40af;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-800">FinanControl</h1>
+    <span class="text-gray-600">Protótipo</span>
+  </header>
+
+  <nav class="bg-white shadow flex space-x-4 px-4 py-2">
+    <button onclick="showTab('dashboard')" class="tab-btn tab-active">Dashboard</button>
+    <button onclick="showTab('expenses')" class="tab-btn">Despesas</button>
+    <button onclick="showTab('documents')" class="tab-btn">Documentos</button>
+  </nav>
+
+  <main class="p-4">
+    <section id="dashboard" class="tab-content">
+      <h2 class="text-lg font-semibold mb-2">Resumo</h2>
+      <p class="text-gray-700">Total de despesas: <span id="total">R$ 0,00</span></p>
+      <canvas id="chart" class="mt-4 bg-white p-4 rounded shadow" height="150"></canvas>
+    </section>
+
+    <section id="expenses" class="tab-content hidden">
+      <h2 class="text-lg font-semibold mb-2">Despesas</h2>
+      <ul id="expenseList" class="list-disc list-inside text-gray-700"></ul>
+    </section>
+
+    <section id="documents" class="tab-content hidden">
+      <h2 class="text-lg font-semibold mb-2">Documentos</h2>
+      <p class="text-gray-600">RG, CPF, CNH - armazenados localmente.</p>
+    </section>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    function showTab(tab) {
+      contents.forEach(c => c.classList.add('hidden'));
+      tabs.forEach(t => t.classList.remove('tab-active'));
+      document.getElementById(tab).classList.remove('hidden');
+      document.querySelector(\`.tab-btn[onclick="showTab('${tab}')"]\`).classList.add('tab-active');
+    }
+
+    const state = {
+      expenses: [
+        { name: 'Supermercado', value: 120 },
+        { name: 'Farmácia', value: 80 },
+        { name: 'Academia', value: 90 }
+      ]
+    };
+
+    function render() {
+      let total = state.expenses.reduce((sum, e) => sum + e.value, 0);
+      document.getElementById('total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+
+      const ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: state.expenses.map(e => e.name),
+          datasets: [{
+            label: 'Gastos',
+            data: state.expenses.map(e => e.value),
+            backgroundColor: ['#6366f1', '#4ade80', '#facc15']
+          }]
+        }
+      });
+
+      const ul = document.getElementById('expenseList');
+      ul.innerHTML = '';
+      state.expenses.forEach(e => {
+        const li = document.createElement('li');
+        li.textContent = e.name + ': R$ ' + e.value.toFixed(2).replace('.', ',');
+        ul.appendChild(li);
+      });
+    }
+
+    render();
+  </script>
+</body>
+
+</html>
